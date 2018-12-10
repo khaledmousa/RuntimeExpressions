@@ -6,15 +6,14 @@ open RuntimeExpressionTree
 %token <string> LITERAL
 %token <decimal> NUM
 %token <int64> LONG
-%token PLUS MINUS MULT DIV ASSIGN EQ NE LT GT LTE GTE OPAND OPOR
-%token TRUE FALSE
+%token TRUE FALSE ASSIGN
 %token OPENBRACKET CLOSINGBRACKET ENDSTATEMENT COMMA
+%token OPAND OPOR EQ NE LT GT LTE GTE PLUS MINUS MULT DIV
 %token EOF
-%left ID
-%left EQ NE LT GT LTE GTE OPAND OPOR
+%left OPAND OPOR
+%left EQ NE LT GT LTE GTE 
 %left PLUS MINUS
 %left MULT DIV
-%left OPENBRACKET
 
 %nonassoc UMINUS //uniary minus
 
@@ -39,20 +38,17 @@ expression:
 		| FALSE		{ Long(0L) }
 		| LITERAL   { Literal($1) }
         | MINUS expression %prec UMINUS { BinaryExpression(Num(1m - 2m), Mult, $2) }
-        | expression op expression { BinaryExpression($1, $2, $3) }
+        | expression MULT expression { BinaryExpression($1, Mult, $3) }
+		| expression DIV expression { BinaryExpression($1, Div, $3) }
+		| expression PLUS expression { BinaryExpression($1, Plus, $3) }
+		| expression MINUS expression { BinaryExpression($1, Minus, $3) }
+		| expression EQ expression { BinaryExpression($1, Eq, $3) }
+		| expression NE expression { BinaryExpression($1, Ne, $3) }
+		| expression LT expression { BinaryExpression($1, Lt, $3) }
+		| expression GT expression { BinaryExpression($1, Gt, $3) }
+		| expression LTE expression { BinaryExpression($1, Lte, $3) }
+		| expression GTE expression { BinaryExpression($1, Gte, $3) }
+		| expression OPAND expression { BinaryExpression($1, OpAnd, $3) }
+		| expression OPOR expression { BinaryExpression($1, OpOr, $3) }		
         | OPENBRACKET expression CLOSINGBRACKET { $2 }          
 		| ID OPENBRACKET expression_list CLOSINGBRACKET { Invoc($1, $3) }
-
-op: 
-    | MULT {Mult} 
-    | DIV {Div} 
-    | PLUS {Plus} 
-    | MINUS {Minus} 
-    | EQ  {Eq}
-    | NE  {Ne}
-    | LT  {Lt}
-    | GT  {Gt}
-    | LTE {Lte}
-    | GTE {Gte}
-	| OPAND {OpAnd}
-	| OPOR  {OpOr}

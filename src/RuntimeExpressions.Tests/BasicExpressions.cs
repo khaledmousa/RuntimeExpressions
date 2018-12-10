@@ -10,7 +10,7 @@ namespace RuntimeExpressions.Tests
     [TestFixture]
     public class BasicExpressions
     {
-        private EvaluationEngine _engine;
+        private EvaluationEngine _engine;        
 
         [SetUp]
         public void Init()
@@ -56,6 +56,8 @@ namespace RuntimeExpressions.Tests
         [Test]
         public void Can_Handle_Precedence()
         {
+            Assert.AreEqual(9, _engine.Evaluate<int>("2 * 2 + 5"));
+            Assert.AreEqual(-4, _engine.Evaluate<int>("10 / 5 - 6"));
             Assert.AreEqual(12, _engine.Evaluate<int>("2 + 2 * 5"));
             Assert.AreEqual(4, _engine.Evaluate<int>("6 - 10 / 5"));
         }
@@ -65,6 +67,8 @@ namespace RuntimeExpressions.Tests
         {
             Assert.AreEqual(20, _engine.Evaluate<int>("(2 + 2) * 5"));
             Assert.AreEqual(-1, _engine.Evaluate<int>("(6 - 10) / 4"));
+            Assert.AreEqual(20, _engine.Evaluate<int>("5 * (2 + 2)"));
+            Assert.AreEqual(-1, _engine.Evaluate<int>("0.25 * (6 - 10)"));
         }
     }
 }
