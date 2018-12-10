@@ -1,7 +1,8 @@
 # RuntimeExpressions
 Simple runtime expression evaluation for .NET
 
-A simple expression evaluator.
+A simple, extensible expression evaluator. The evaluator accepts string expressions and evaluates the expression value. the `EvaluationEngine` is the main class that does the evaluation, and it optionally accepts implementations of `IFunctionEvaluator` and `IVariableEvaluator` that act as extension points to allow evluating custom defined functions and variables.
+Below are some examples of basic use cases, all shown in C#
 
 Usage examples:
 ```cs
