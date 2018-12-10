@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="RuntimeExpressionEvaluators.fs" />
+		<Compile Include="RuntimeExpressionTree.fs" />
+		<Compile Include="REParser.fs" />
+		<Compile Include="RELexer.fs" />		
+		<Compile Include="RuntimeExpressionsEngine.fs" />
+		<None Include="REParser.fsy" />
+		<None Include="RELexer.fsl" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="FsLexYacc" Version="7.0.6" />
+	</ItemGroup>
+
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<Exec Command="&quot;$(ProjectDir)..\packages\FsLexYacc\7.0.6\build\fslex.exe&quot; &quot;$(ProjectDir)RELexer.fsl&quot; -o &quot;$(ProjectDir)RELexer.fs&quot; --unicode&#xD;&#xA;&#xD;&#xA;&quot;$(ProjectDir)..\packages\FsLexYacc\7.0.6\build\fsyacc.exe&quot; &quot;$(ProjectDir)REParser.fsy&quot; -o &quot;$(ProjectDir)\REParser.fs&quot; --module REParser" />
+	</Target>
+
+</Project>

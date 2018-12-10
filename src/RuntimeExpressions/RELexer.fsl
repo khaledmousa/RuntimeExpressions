@@ -1,0 +1,57 @@
+﻿{
+module RELexer
+
+open System
+open REParser
+open Microsoft.FSharp.Text.Lexing
+
+let ops = 
+    [
+        "+", PLUS;
+        "-", MINUS;
+        "*", MULT;
+        "/", DIV;
+        ">", GT;
+        "<", LT;
+        "==", EQ;
+        ">=", GTE;
+        "<=", LTE;
+        "!=", NE;
+        "&&", OPAND;
+        "||", OPOR;
+    ] |> Map.ofList
+
+let keywords = 
+    [
+        "true", TRUE;
+        "false", FALSE;
+    ] |> Map.ofList
+}
+
+let char			= ['a'-'z' 'A'-'Z']
+let identifier		= (char(char|digit|['_' '.'])*)
+let digit           = ['0'-'9']
+let long            = digit+ 
+let num             = digit+ '.' digit+
+let literal			= '\"' [^'\"']* '\"'
+let whitespace      = [' ' '\t' '\r' '\n' ]
+let operator        = "+" | "-" | "*" | "/" | "->" | "==" | "!=" | "<" | ">" | "<=" | ">=" | "&&" | "||"
+let openbracket     = "("
+let closebracket    = ")"
+let comma			= ","
+let endstatement    = ";"
+
+rule tokenize = parse
+| whitespace    { tokenize lexbuf }
+| long          { LONG(Int64.Parse(LexBuffer<_>.LexemeString lexbuf)) }
+| num           { NUM(Decimal.Parse(LexBuffer<_>.LexemeString lexbuf)) }
+| operator      { ops.[LexBuffer<_>.LexemeString lexbuf] }
+| openbracket   { OPENBRACKET }
+| closebracket  { CLOSINGBRACKET }
+| endstatement  { ENDSTATEMENT }
+| comma			{ COMMA }
+| identifier    { match keywords.TryFind(LexBuffer<_>.LexemeString  lexbuf) with   
+                  | Some(token) -> token   
+                  | None -> ID(LexBuffer<_>.LexemeString  lexbuf) }   
+| literal	    { LITERAL( (LexBuffer<_>.LexemeString  lexbuf).Trim('\"') ) }  
+| eof           { EOF }
