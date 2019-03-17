@@ -9,7 +9,9 @@ open RuntimeExpressionTree
 %token TRUE FALSE ASSIGN
 %token OPENBRACKET CLOSINGBRACKET ENDSTATEMENT COMMA
 %token OPAND OPOR EQ NE LT GT LTE GTE PLUS MINUS MULT DIV
+%token EQUALS
 %token EOF
+%left EQUALS
 %left OPAND OPOR
 %left EQ NE LT GT LTE GTE 
 %left PLUS MINUS
@@ -23,8 +25,12 @@ open RuntimeExpressionTree
 
 %%
 
-start: expression 
+start: statement 
        EOF { $1 }
+
+statement:
+	| ID EQUALS expression { expr.Assignment($1, $3) }
+	| expression { expr.Expression($1) }	
 
 expression_list:
     | expression { [$1] }
@@ -52,3 +58,4 @@ expression:
 		| expression OPOR expression { BinaryExpression($1, OpOr, $3) }		
         | OPENBRACKET expression CLOSINGBRACKET { $2 }          
 		| ID OPENBRACKET expression_list CLOSINGBRACKET { Invoc($1, $3) }
+		

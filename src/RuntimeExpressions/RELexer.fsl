@@ -36,6 +36,7 @@ let num             = digit+ '.' digit+
 let literal			= '\"' [^'\"']* '\"'
 let whitespace      = [' ' '\t' '\r' '\n' ]
 let operator        = "+" | "-" | "*" | "/" | "->" | "==" | "!=" | "<" | ">" | "<=" | ">=" | "&&" | "||"
+let equality		= "="
 let openbracket     = "("
 let closebracket    = ")"
 let comma			= ","
@@ -46,6 +47,7 @@ rule tokenize = parse
 | long          { LONG(Int64.Parse(LexBuffer<_>.LexemeString lexbuf)) }
 | num           { NUM(Decimal.Parse(LexBuffer<_>.LexemeString lexbuf)) }
 | operator      { ops.[LexBuffer<_>.LexemeString lexbuf] }
+| equality		{ EQUALS }
 | openbracket   { OPENBRACKET }
 | closebracket  { CLOSINGBRACKET }
 | endstatement  { ENDSTATEMENT }

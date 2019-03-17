@@ -6,6 +6,14 @@ open System.Linq
 open System
 open System.Linq
 open System.Collections.Generic
+open System.Linq.Expressions
+open System.Linq.Expressions
+
+type AssignmentExpression = {Variable: string; Expression: RuntimeExpressionTree.Expression}
+
+type ParseResult = 
+    | AssignmentResult of AssignmentExpression
+    | ExpressionResult of RuntimeExpressionTree.Expression
 
 type EvaluationEngine (variableEvaluators:IVariableEvaluator[], functionEvaluators:IFunctionEvaluator[]) =
                 
@@ -52,7 +60,7 @@ type EvaluationEngine (variableEvaluators:IVariableEvaluator[], functionEvaluato
             let y = REParser.start RELexer.tokenize lexbuf    
             y 
 
-        let rec EvaluateInternal(expressionTree : expr) =            
+        let rec EvaluateInternal(expressionTree : RuntimeExpressionTree.Expression) =            
             match expressionTree with
                 | Id d -> 
                     match EvalVariable(d, _varEvaluators |> List.sortBy(fun e -> e.Order)) with
@@ -81,16 +89,32 @@ type EvaluationEngine (variableEvaluators:IVariableEvaluator[], functionEvaluato
                         | Lte       -> EvaluateInternal(Invoc("$lessthanorequal", [e1; e2]))
                         | OpAnd     -> EvaluateInternal(Invoc("$and", [e1; e2]))
                         | OpOr      -> EvaluateInternal(Invoc("$or", [e1; e2]))
-                        | _         -> failwith(String.Concat("Operator ", op.ToString() ,"not supported"))
+                        | _         -> failwith(String.Concat("Operator ", op.ToString() ,"not supported"))               
         
         new() = EvaluationEngine(null, null)
 
+        member this.ParseString(expression) =
+            let tree = Parse expression
+            match tree with 
+                | Assignment(v, e) -> AssignmentResult({Variable = v; Expression = e})
+                | Expression(e) -> ExpressionResult(e)
+
         member this.Evaluate(expression) = 
-             let expressionTree = Parse expression
-             (EvaluateInternal expressionTree).UnderlyingValue
+            let expressionTree = Parse expression
+            match expressionTree with             
+                | RuntimeExpressionTree.Expression e -> (EvaluateInternal e).UnderlyingValue
+                | _ -> failwith("Cannot evaluate assignment")
+             
 
         member this.Evaluate<'T>(expression) = 
-             let expressionTree = Parse expression
-             let result = (EvaluateInternal expressionTree).UnderlyingValue
-             Convert.ChangeType(result, typedefof<'T>)
+            let expressionTree = Parse expression
+            match expressionTree with             
+                | RuntimeExpressionTree.Expression e -> 
+                    let result = (EvaluateInternal e).UnderlyingValue
+                    Convert.ChangeType(result, typedefof<'T>)
+                | _ -> failwith("Cannot evaluate assignment")
 
+        member this.EvaluateExpression<'T>(expression) =             
+            let result = (EvaluateInternal expression).UnderlyingValue
+            Convert.ChangeType(result, typedefof<'T>)
+            

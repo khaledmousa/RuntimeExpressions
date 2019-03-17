@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static RuntimeExpressions.ParseResult;
 
 namespace RuntimeExpressions.Tests
 {
@@ -69,6 +70,16 @@ namespace RuntimeExpressions.Tests
             Assert.AreEqual(-1, _engine.Evaluate<int>("(6 - 10) / 4"));
             Assert.AreEqual(20, _engine.Evaluate<int>("5 * (2 + 2)"));
             Assert.AreEqual(-1, _engine.Evaluate<int>("0.25 * (6 - 10)"));
+        }
+
+        [Test]
+        public void Can_Evaluate_Assignments()
+        {
+            var assignment = "x = (2 + 2) * 5";
+            var parseResult = _engine.ParseString(assignment);
+            Assert.IsTrue(parseResult.IsAssignmentResult);
+            Assert.AreEqual("x", (parseResult as AssignmentResult).Item.Variable);
+            Assert.AreEqual(20, _engine.EvaluateExpression<int>((parseResult as AssignmentResult).Item.Expression));
         }
     }
 }
